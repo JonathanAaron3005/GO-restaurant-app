@@ -21,7 +21,7 @@ func getFoodMenu(c echo.Context) error {
 		},
 		{
 			Name:      "Nasi goreng",
-			OrderCode: "nasi-goreng",
+			OrderCode: "nasi_goreng",
 			price:     25000,
 		},
 	}
