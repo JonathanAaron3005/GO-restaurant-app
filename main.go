@@ -1,59 +1,102 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+func main() {
+	seedDB()
+	e := echo.New()
+
+	e.GET("/menu", getMenu)
+
+	e.Logger.Fatal(e.Start(":14045"))
+}
+
+const (
+	dbAddress = "host=localhost port=5432 user=postgres password=ja3005 dbname=go_resto_app sslmode=disable"
 )
 
 type MenuItem struct {
 	Name      string
 	OrderCode string
-	price     int
+	Price     int64
+	Type      MenuType
 }
 
-func getFoodMenu(c echo.Context) error {
+type MenuType string //alias
+
+const (
+	MenuTypeFood  = "food"
+	MenuTypeDrink = "drink"
+)
+
+func seedDB() {
 	foodMenu := []MenuItem{
 		{
 			Name:      "Bakmie ayam",
 			OrderCode: "bakmie_ayam",
-			price:     31200,
+			Price:     31200,
+			Type:      MenuTypeFood,
 		},
 		{
 			Name:      "Nasi goreng",
 			OrderCode: "nasi_goreng",
-			price:     25000,
+			Price:     25000,
+			Type:      MenuTypeFood,
 		},
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data": foodMenu,
-	})
-}
-
-func getDrinkMenu(c echo.Context) error {
 	drinkMenu := []MenuItem{
 		{
 			Name:      "Badak",
 			OrderCode: "badak",
-			price:     8000,
+			Price:     8000,
+			Type:      MenuTypeDrink,
 		},
 		{
 			Name:      "Ice tea",
 			OrderCode: "ice_tea",
-			price:     3000,
+			Price:     3000,
+			Type:      MenuTypeDrink,
 		},
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data": drinkMenu,
-	})
+	fmt.Println(foodMenu)
+	fmt.Println(drinkMenu)
+
+	db, err := gorm.Open(postgres.Open(dbAddress))
+	if err != nil {
+		panic(err) //utk stop smua coding
+	}
+
+	//db.AutoMigrate(&MenuItem{})
+
+	if err := db.First(&MenuItem{}).Error; err == gorm.ErrRecordNotFound {
+		db.Create(&foodMenu)
+		db.Create(&drinkMenu)
+	}
+
 }
 
-func main() {
-	e := echo.New()
+func getMenu(c echo.Context) error {
+	menuType := c.FormValue("menu_type") //food or drink
 
-	e.GET("/menu/food", getFoodMenu)
-	e.GET("/menu/drink", getDrinkMenu)
-	e.Logger.Fatal(e.Start(":14045"))
+	var menuData []MenuItem
+
+	db, err := gorm.Open(postgres.Open(dbAddress))
+	if err != nil {
+		panic(err)
+	}
+
+	db.Where(MenuItem{Type: MenuType(menuType)}).Find(&menuData)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data": menuData,
+	})
 }
