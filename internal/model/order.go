@@ -12,7 +12,7 @@ type ProductOrderStatus string
 
 type ProductOrder struct {
 	ID         string `gorm:"primaryKey"`
-	OrderID    string
+	OrderID    string //foreign key
 	OrderCode  string
 	Quantity   int
 	TotalPrice int64
