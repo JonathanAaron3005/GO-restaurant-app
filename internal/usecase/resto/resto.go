@@ -15,6 +15,6 @@ func GetUsecase(menuRepo menu.Repository) Usecase {
 	}
 }
 
-func (r *restoUsecase) GetMenu(menuType string) ([]model.MenuItem, error) {
-	return r.menuRepo.GetMenu(menuType)
+func (r *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
+	return r.menuRepo.GetMenuList(menuType)
 }
