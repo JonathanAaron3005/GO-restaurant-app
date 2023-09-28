@@ -27,7 +27,7 @@ type OrderMenuProductRequest struct {
 }
 
 type OrderMenuRequest struct {
-	MenuProductRequests []OrderMenuProductRequest
+	OrderProducts []OrderMenuProductRequest
 }
 
 type GetOrderInfoRequest struct {
