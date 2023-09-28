@@ -9,6 +9,10 @@ import (
 )
 
 func seedDB(db *gorm.DB) {
+
+	//migrate the schema
+	db.AutoMigrate(&model.MenuItem{}, &model.Order{}, &model.ProductOrder{})
+
 	foodMenu := []model.MenuItem{
 		{
 			Name:      "Bakmie ayam",
@@ -41,8 +45,6 @@ func seedDB(db *gorm.DB) {
 
 	fmt.Println(foodMenu)
 	fmt.Println(drinkMenu)
-
-	//db.AutoMigrate(&MenuItem{})
 
 	if err := db.First(&model.MenuItem{}).Error; err == gorm.ErrRecordNotFound {
 		db.Create(&foodMenu)

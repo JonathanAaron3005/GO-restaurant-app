@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *handler) GetMenu(c echo.Context) error {
+func (h *handler) GetMenuList(c echo.Context) error {
 	menuType := c.FormValue("menu_type") //food or drink
 
 	menuData, err := h.restoUsecase.GetMenuList(menuType)
