@@ -35,6 +35,14 @@ func (m *menuRepo) GetMenu(orderCode string) (model.MenuItem, error) {
 	return menuData, nil
 }
 
+func (m *menuRepo) CreateMenu(menu model.MenuItem) (model.MenuItem, error) {
+	if err := m.db.Create(&menu).Error; err != nil {
+		return menu, err
+	}
+
+	return menu, nil
+}
+
 /*
 Dalam kasus ini, interface Repository memiliki metode GetMenu yang dideklarasikan dengan receiver pointer (*menuRepo).
 Oleh karena itu, untuk mengembalikan sebuah nilai sebagai Repository, nilai tersebut harus memiliki tipe *menuRepo (pointer ke menuRepo)

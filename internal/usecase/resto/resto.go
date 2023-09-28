@@ -24,6 +24,10 @@ func (r *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
 	return r.menuRepo.GetMenuList(menuType)
 }
 
+func (r *restoUsecase) AddNewMenu(menu model.MenuItem) (model.MenuItem, error) {
+	return r.menuRepo.CreateMenu(menu)
+}
+
 func (r *restoUsecase) Order(req model.OrderMenuRequest) (model.Order, error) {
 	productOrderData := make([]model.ProductOrder, len(req.OrderProducts))
 
