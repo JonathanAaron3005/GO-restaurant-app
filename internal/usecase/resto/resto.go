@@ -51,6 +51,7 @@ func (r *restoUsecase) Order(req model.OrderMenuRequest) (model.Order, error) {
 		ID:            uuid.New().String(),
 		Status:        constant.OrderStatusProccessed,
 		ProductOrders: productOrderData,
+		ReferenceID:   req.ReferenceID,
 	}
 
 	createdOrder, err := r.orderRepo.CreateOrder(orderData)
