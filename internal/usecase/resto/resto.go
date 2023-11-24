@@ -72,3 +72,7 @@ func (r *restoUsecase) GetOrderInfo(req model.GetOrderInfoRequest) (model.Order,
 
 	return orderData, nil
 }
+
+func (r *restoUsecase) GetAllOrdersInfo() ([]model.Order, error) {
+	return r.orderRepo.GetAllOrders()
+}

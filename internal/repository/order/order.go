@@ -32,3 +32,13 @@ func (or *orderRepo) GetOrderInfo(orderID string) (model.Order, error) {
 
 	return orderInfo, nil
 }
+
+func (or *orderRepo) GetAllOrders() ([]model.Order, error) {
+	var orderData []model.Order
+
+	if err := or.db.Preload("ProductOrders").Find(&orderData).Error; err != nil {
+		return orderData, err
+	}
+
+	return orderData, nil
+}

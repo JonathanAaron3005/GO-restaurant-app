@@ -54,3 +54,19 @@ func (h *handler) GetOrderInfo(c echo.Context) error {
 	})
 
 }
+
+func (h *handler) getAllOrdersInfo(c echo.Context) error {
+	orderData, err := h.restoUsecase.GetAllOrdersInfo()
+
+	if err != nil {
+		fmt.Printf("got error %s\n", err.Error())
+
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data": orderData,
+	})
+}
