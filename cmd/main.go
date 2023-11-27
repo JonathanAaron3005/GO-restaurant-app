@@ -22,7 +22,8 @@ func main() {
 
 	handler := rest.NewHandler(restoUsecase)
 
-	rest.LoadRoutes(e, handler)
+	rest.
+		rest.LoadRoutes(e, handler)
 
 	e.Logger.Fatal(e.Start(":14045"))
 }
