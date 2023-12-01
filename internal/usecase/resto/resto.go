@@ -1,22 +1,27 @@
 package resto
 
 import (
+	"errors"
+
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model/constant"
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/menu"
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/order"
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/user"
 	"github.com/google/uuid"
 )
 
 type restoUsecase struct {
 	menuRepo  menu.Repository
 	orderRepo order.Repository
+	userRepo  user.Repository
 }
 
-func GetUsecase(menuRepo menu.Repository, orderRepo order.Repository) Usecase {
+func GetUsecase(menuRepo menu.Repository, orderRepo order.Repository, userRepo user.Repository) Usecase {
 	return &restoUsecase{
 		menuRepo:  menuRepo,
 		orderRepo: orderRepo,
+		userRepo:  userRepo,
 	}
 }
 
@@ -75,4 +80,34 @@ func (r *restoUsecase) GetOrderInfo(req model.GetOrderInfoRequest) (model.Order,
 
 func (r *restoUsecase) GetAllOrdersInfo() ([]model.Order, error) {
 	return r.orderRepo.GetAllOrders()
+}
+
+func (r *restoUsecase) RegisterUser(req model.RegisterRequest) (model.User, error) {
+	userRegistered, err := r.userRepo.CheckRegistered(req.Username)
+
+	if err != nil {
+		return model.User{}, err
+	}
+
+	if userRegistered {
+		return model.User{}, errors.New("User already registered")
+	}
+
+	userHash, err := r.userRepo.GenerateUserHash(req.Password)
+
+	if err != nil {
+		return model.User{}, err
+	}
+
+	userData, err := r.userRepo.RegisterUser(model.User{
+		ID:       uuid.New().String(),
+		Username: req.Username,
+		Hash:     userHash,
+	})
+
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return userData, nil
 }

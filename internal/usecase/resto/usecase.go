@@ -8,4 +8,5 @@ type Usecase interface {
 	Order(req model.OrderMenuRequest) (model.Order, error)
 	GetOrderInfo(req model.GetOrderInfoRequest) (model.Order, error)
 	GetAllOrdersInfo() ([]model.Order, error)
+	RegisterUser(req model.RegisterRequest) (model.User, error)
 }
