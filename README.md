@@ -8,3 +8,7 @@ This project is part of a certified course that I took at [kelas.work](https://k
 ### Technologies Used
 * Language: Go
 * Database: PostgreSQL
+
+* ### Security
+* For security, I implemented argon2 to securely hash users' password.
+* For authentication and authorization, I use JWT or JSON Web Token.
