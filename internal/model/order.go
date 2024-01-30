@@ -4,6 +4,7 @@ type OrderStatus string
 
 type Order struct {
 	ID            string         `gorm:"primaryKey" json:"id"`
+	UserID        string         `json:"user_id"`
 	Status        OrderStatus    `json:"status"`
 	ProductOrders []ProductOrder `json:"product_orders"`
 	ReferenceID   string         `gorm:"unique" json:"reference_id"`
@@ -28,10 +29,12 @@ type OrderMenuProductRequest struct {
 }
 
 type OrderMenuRequest struct {
+	UserID        string                    `json:"-"`
 	OrderProducts []OrderMenuProductRequest `json:"order_products"`
 	ReferenceID   string                    `json:"reference_id"`
 }
 
 type GetOrderInfoRequest struct {
+	UserID  string `json:"-"`
 	OrderId string `json:"order_id"`
 }

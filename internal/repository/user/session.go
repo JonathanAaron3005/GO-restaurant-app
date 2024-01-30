@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"time"
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
@@ -36,4 +37,22 @@ func (user *userRepo) generateAccessToken(userID string) (string, error) {
 	accessJWT := jwt.NewWithClaims(jwt.GetSigningMethod("RS256"), accessClaims)
 
 	return accessJWT.SignedString(user.signKey)
+}
+
+func (user *userRepo) CheckSession(data model.UserSession) (userID string, err error) {
+	accessToken, err := jwt.ParseWithClaims(data.JWTToken, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		return &user.signKey.PublicKey, nil
+	})
+
+	accessTokenClaims, ok := accessToken.Claims.(*Claims)
+	//cek apakah dia bisa dijadiin Claims (claims ny ada ato tidak)
+	if !ok {
+		return "", errors.New("unauthorized")
+	}
+
+	if accessToken.Valid {
+		return accessTokenClaims.Subject, nil
+	}
+
+	return "", errors.New("unauthorized")
 }
