@@ -6,14 +6,18 @@ import (
 	"net/http"
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/tracing"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) GetMenuList(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "GetMenuList")
+	defer span.End()
+
 	menuType := c.FormValue("menu_type") //food or drink
 
-	menuData, err := h.restoUsecase.GetMenuList(menuType)
+	menuData, err := h.restoUsecase.GetMenuList(ctx, menuType)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -30,6 +34,9 @@ func (h *handler) GetMenuList(c echo.Context) error {
 }
 
 func (h *handler) AddNewMenu(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "AddNewMenu")
+	defer span.End()
+
 	var menuData model.MenuItem
 
 	err := json.NewDecoder(c.Request().Body).Decode(&menuData)
@@ -41,7 +48,7 @@ func (h *handler) AddNewMenu(c echo.Context) error {
 		})
 	}
 
-	createdMenu, err := h.restoUsecase.AddNewMenu(menuData)
+	createdMenu, err := h.restoUsecase.AddNewMenu(ctx, menuData)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,

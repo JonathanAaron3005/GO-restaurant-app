@@ -11,13 +11,14 @@ import (
 	mRepo "github.com/JonathanAaron3005/go-restaurant-app/internal/repository/menu"
 	orRepo "github.com/JonathanAaron3005/go-restaurant-app/internal/repository/order"
 	uRepo "github.com/JonathanAaron3005/go-restaurant-app/internal/repository/user"
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/tracing"
 	rUsecase "github.com/JonathanAaron3005/go-restaurant-app/internal/usecase/resto"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	logger.Init()
-
+	tracing.Init("http://localhost:14268/api/traces")
 	e := echo.New()
 
 	db := database.GetDB(dbAddress)

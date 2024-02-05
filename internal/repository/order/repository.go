@@ -1,9 +1,13 @@
 package order
 
-import "github.com/JonathanAaron3005/go-restaurant-app/internal/model"
+import (
+	"context"
+
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
+)
 
 type Repository interface {
-	CreateOrder(order model.Order) (model.Order, error)
-	GetOrderInfo(orderID string) (model.Order, error)
-	GetAllOrders() ([]model.Order, error)
+	CreateOrder(ctx context.Context, order model.Order) (model.Order, error)
+	GetOrderInfo(ctx context.Context, orderID string) (model.Order, error)
+	GetAllOrders(ctx context.Context) ([]model.Order, error)
 }

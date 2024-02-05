@@ -1,10 +1,12 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/tracing"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -12,8 +14,11 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func (user *userRepo) CreateUserSession(userID string) (model.UserSession, error) {
-	accessToken, err := user.generateAccessToken(userID)
+func (user *userRepo) CreateUserSession(ctx context.Context, userID string) (model.UserSession, error) {
+	ctx, span := tracing.CreateSpan(ctx, "CreateUserSession")
+	defer span.End()
+
+	accessToken, err := user.generateAccessToken(ctx, userID)
 
 	if err != nil {
 		return model.UserSession{}, err
@@ -24,7 +29,10 @@ func (user *userRepo) CreateUserSession(userID string) (model.UserSession, error
 	}, nil
 }
 
-func (user *userRepo) generateAccessToken(userID string) (string, error) {
+func (user *userRepo) generateAccessToken(ctx context.Context, userID string) (string, error) {
+	_, span := tracing.CreateSpan(ctx, "generateAccessToken")
+	defer span.End()
+
 	accessTokenExp := time.Now().Add(user.accessExp).Unix()
 
 	accessClaims := Claims{
@@ -39,7 +47,10 @@ func (user *userRepo) generateAccessToken(userID string) (string, error) {
 	return accessJWT.SignedString(user.signKey)
 }
 
-func (user *userRepo) CheckSession(data model.UserSession) (userID string, err error) {
+func (user *userRepo) CheckSession(ctx context.Context, data model.UserSession) (userID string, err error) {
+	_, span := tracing.CreateSpan(ctx, "CheckSession")
+	defer span.End()
+
 	accessToken, err := jwt.ParseWithClaims(data.JWTToken, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return &user.signKey.PublicKey, nil
 	})

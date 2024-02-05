@@ -1,6 +1,7 @@
 package resto
 
 import (
+	"context"
 	"errors"
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
@@ -8,6 +9,7 @@ import (
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/menu"
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/order"
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/repository/user"
+	"github.com/JonathanAaron3005/go-restaurant-app/internal/tracing"
 	"github.com/google/uuid"
 )
 
@@ -25,20 +27,29 @@ func GetUsecase(menuRepo menu.Repository, orderRepo order.Repository, userRepo u
 	}
 }
 
-func (r *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
-	return r.menuRepo.GetMenuList(menuType)
+func (r *restoUsecase) GetMenuList(ctx context.Context, menuType string) ([]model.MenuItem, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetMenuList")
+	defer span.End()
+
+	return r.menuRepo.GetMenuList(ctx, menuType)
 }
 
-func (r *restoUsecase) AddNewMenu(menu model.MenuItem) (model.MenuItem, error) {
-	return r.menuRepo.CreateMenu(menu)
+func (r *restoUsecase) AddNewMenu(ctx context.Context, menu model.MenuItem) (model.MenuItem, error) {
+	ctx, span := tracing.CreateSpan(ctx, "AddNewMenu")
+	defer span.End()
+
+	return r.menuRepo.CreateMenu(ctx, menu)
 }
 
-func (r *restoUsecase) Order(req model.OrderMenuRequest) (model.Order, error) {
+func (r *restoUsecase) Order(ctx context.Context, req model.OrderMenuRequest) (model.Order, error) {
+	ctx, span := tracing.CreateSpan(ctx, "Order")
+	defer span.End()
+
 	productOrderData := make([]model.ProductOrder, len(req.OrderProducts))
 
 	for i, orderProduct := range req.OrderProducts {
 		//mastiin bahwa product yang di order ada di db
-		menuData, err := r.menuRepo.GetMenu(orderProduct.OrderCode)
+		menuData, err := r.menuRepo.GetMenu(ctx, orderProduct.OrderCode)
 		if err != nil {
 			return model.Order{}, err
 		}
@@ -60,7 +71,7 @@ func (r *restoUsecase) Order(req model.OrderMenuRequest) (model.Order, error) {
 		ReferenceID:   req.ReferenceID,
 	}
 
-	createdOrder, err := r.orderRepo.CreateOrder(orderData)
+	createdOrder, err := r.orderRepo.CreateOrder(ctx, orderData)
 	if err != nil {
 		return model.Order{}, err
 	}
@@ -69,8 +80,11 @@ func (r *restoUsecase) Order(req model.OrderMenuRequest) (model.Order, error) {
 
 }
 
-func (r *restoUsecase) GetOrderInfo(req model.GetOrderInfoRequest) (model.Order, error) {
-	orderData, err := r.orderRepo.GetOrderInfo(req.OrderId)
+func (r *restoUsecase) GetOrderInfo(ctx context.Context, req model.GetOrderInfoRequest) (model.Order, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetOrderInfo")
+	defer span.End()
+
+	orderData, err := r.orderRepo.GetOrderInfo(ctx, req.OrderId)
 
 	if err != nil {
 		return orderData, err
@@ -83,12 +97,18 @@ func (r *restoUsecase) GetOrderInfo(req model.GetOrderInfoRequest) (model.Order,
 	return orderData, nil
 }
 
-func (r *restoUsecase) GetAllOrdersInfo() ([]model.Order, error) {
-	return r.orderRepo.GetAllOrders()
+func (r *restoUsecase) GetAllOrdersInfo(ctx context.Context) ([]model.Order, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetAllOrdersInfos")
+	defer span.End()
+
+	return r.orderRepo.GetAllOrders(ctx)
 }
 
-func (r *restoUsecase) RegisterUser(req model.RegisterRequest) (model.User, error) {
-	userRegistered, err := r.userRepo.CheckRegistered(req.Username)
+func (r *restoUsecase) RegisterUser(ctx context.Context, req model.RegisterRequest) (model.User, error) {
+	ctx, span := tracing.CreateSpan(ctx, "RegisterUser")
+	defer span.End()
+
+	userRegistered, err := r.userRepo.CheckRegistered(ctx, req.Username)
 
 	if err != nil {
 		return model.User{}, err
@@ -98,13 +118,13 @@ func (r *restoUsecase) RegisterUser(req model.RegisterRequest) (model.User, erro
 		return model.User{}, errors.New("User already registered")
 	}
 
-	userHash, err := r.userRepo.GenerateUserHash(req.Password)
+	userHash, err := r.userRepo.GenerateUserHash(ctx, req.Password)
 
 	if err != nil {
 		return model.User{}, err
 	}
 
-	userData, err := r.userRepo.RegisterUser(model.User{
+	userData, err := r.userRepo.RegisterUser(ctx, model.User{
 		ID:       uuid.New().String(),
 		Username: req.Username,
 		Hash:     userHash,
@@ -117,13 +137,16 @@ func (r *restoUsecase) RegisterUser(req model.RegisterRequest) (model.User, erro
 	return userData, nil
 }
 
-func (r *restoUsecase) Login(req model.LoginRequest) (model.UserSession, error) {
-	userData, err := r.userRepo.GetUserData(req.Username)
+func (r *restoUsecase) Login(ctx context.Context, req model.LoginRequest) (model.UserSession, error) {
+	ctx, span := tracing.CreateSpan(ctx, "Login")
+	defer span.End()
+
+	userData, err := r.userRepo.GetUserData(ctx, req.Username)
 	if err != nil {
 		return model.UserSession{}, err
 	}
 
-	verified, err := r.userRepo.VerifyLogin(req.Username, req.Password, userData)
+	verified, err := r.userRepo.VerifyLogin(ctx, req.Username, req.Password, userData)
 	if err != nil {
 		return model.UserSession{}, err
 	}
@@ -132,7 +155,7 @@ func (r *restoUsecase) Login(req model.LoginRequest) (model.UserSession, error) 
 		return model.UserSession{}, errors.New("can't verify user login")
 	}
 
-	userSession, err := r.userRepo.CreateUserSession(userData.ID)
+	userSession, err := r.userRepo.CreateUserSession(ctx, userData.ID)
 	if err != nil {
 		return model.UserSession{}, err
 	}
@@ -140,8 +163,11 @@ func (r *restoUsecase) Login(req model.LoginRequest) (model.UserSession, error) 
 	return userSession, nil
 }
 
-func (r *restoUsecase) CheckSession(data model.UserSession) (userID string, err error) {
-	userID, err = r.userRepo.CheckSession(data)
+func (r *restoUsecase) CheckSession(ctx context.Context, data model.UserSession) (userID string, err error) {
+	ctx, span := tracing.CreateSpan(ctx, "CheckSession")
+	defer span.End()
+
+	userID, err = r.userRepo.CheckSession(ctx, data)
 	if err != nil {
 		return "", err
 	}
