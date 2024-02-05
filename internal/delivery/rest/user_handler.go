@@ -7,6 +7,7 @@ import (
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) RegisterUser(c echo.Context) error {
@@ -25,7 +26,9 @@ func (h *handler) RegisterUser(c echo.Context) error {
 	userData, err := h.restoUsecase.RegisterUser(request)
 
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][user_handler][RegisterUser] failed to register new user")
 
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
@@ -51,7 +54,9 @@ func (h *handler) Login(c echo.Context) error {
 
 	sessionData, err := h.restoUsecase.Login(request)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][user_handler][Login] failed to login")
 
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),

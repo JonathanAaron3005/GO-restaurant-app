@@ -7,6 +7,7 @@ import (
 
 	"github.com/JonathanAaron3005/go-restaurant-app/internal/model"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) GetMenuList(c echo.Context) error {
@@ -14,7 +15,9 @@ func (h *handler) GetMenuList(c echo.Context) error {
 
 	menuData, err := h.restoUsecase.GetMenuList(menuType)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][menu_handler][GetMenuList] unable to get menus data")
 
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
@@ -40,7 +43,9 @@ func (h *handler) AddNewMenu(c echo.Context) error {
 
 	createdMenu, err := h.restoUsecase.AddNewMenu(menuData)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][menu_handler][AddNewMenu] failed to add new menu")
 
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
