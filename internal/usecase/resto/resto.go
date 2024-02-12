@@ -84,7 +84,7 @@ func (r *restoUsecase) GetOrderInfo(ctx context.Context, req model.GetOrderInfoR
 	ctx, span := tracing.CreateSpan(ctx, "GetOrderInfo")
 	defer span.End()
 
-	orderData, err := r.orderRepo.GetOrderInfo(ctx, req.OrderId)
+	orderData, err := r.orderRepo.GetOrderInfo(ctx, req.OrderID)
 
 	if err != nil {
 		return orderData, err

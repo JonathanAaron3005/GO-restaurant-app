@@ -55,7 +55,7 @@ func (h *handler) GetOrderInfo(c echo.Context) error {
 
 	orderData, err := h.restoUsecase.GetOrderInfo(ctx, model.GetOrderInfoRequest{
 		UserID:  userID,
-		OrderId: orderID,
+		OrderID: orderID,
 	})
 	if err != nil {
 		logrus.WithFields(logrus.Fields{

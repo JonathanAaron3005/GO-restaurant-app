@@ -36,5 +36,5 @@ type OrderMenuRequest struct {
 
 type GetOrderInfoRequest struct {
 	UserID  string `json:"-"`
-	OrderId string `json:"order_id"`
+	OrderID string `json:"order_id"`
 }
